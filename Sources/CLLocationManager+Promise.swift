@@ -43,18 +43,31 @@ extension CLLocationManager {
     /// - Returns: A new promise that fulfills with the most recent CLLocation
     ///            that satisfies the provided block if it exists. If the block
     ///            does not exist, simply return the last location.
-    public class func requestLocation(authorizationType: RequestAuthorizationType = .automatic, satisfying block: ((CLLocation) -> Bool)? = nil) -> Promise<[CLLocation]> {
-        return promise(yielding: auther(authorizationType), satisfying: block)
+    public class func requestLocation(authorizationType: RequestAuthorizationType = .automatic,
+                                      desiredAccuracy: CLLocationAccuracy? = .none,
+                                      satisfying block: ((CLLocation) -> Bool)? = nil) -> Promise<[CLLocation]> {
+        return promise(yielding: auther(authorizationType),
+                       desiredAccuracy: desiredAccuracy,
+                       satisfying: block)
     }
 
     @available(*, deprecated: 5.0, renamed: "requestLocation")
-    public class func promise(_ requestAuthorizationType: RequestAuthorizationType = .automatic, satisfying block: ((CLLocation) -> Bool)? = nil) -> Promise<[CLLocation]> {
-        return requestLocation(authorizationType: requestAuthorizationType, satisfying: block)
+    public class func promise(_ requestAuthorizationType: RequestAuthorizationType = .automatic,
+                              desiredAccuracy: CLLocationAccuracy? = .none,
+                              satisfying block: ((CLLocation) -> Bool)? = nil) -> Promise<[CLLocation]> {
+        return requestLocation(authorizationType: requestAuthorizationType,
+                               desiredAccuracy: desiredAccuracy,
+                               satisfying: block)
     }
 
-    private class func promise(yielding yield: (CLLocationManager) -> Void = { _ in }, satisfying block: ((CLLocation) -> Bool)? = nil) -> Promise<[CLLocation]> {
+    private class func promise(yielding yield: (CLLocationManager) -> Void = { _ in },
+                               desiredAccuracy: CLLocationAccuracy?,
+                               satisfying block: ((CLLocation) -> Bool)? = nil) -> Promise<[CLLocation]> {
         let manager = LocationManager(satisfying: block)
         manager.delegate = manager
+        if desiredAccuracy = desiredAccuracy {
+            manager.desiredAccuracy = desiredAccuracy
+        }
         yield(manager)
         manager.startUpdatingLocation()
         _ = manager.promise.ensure {
