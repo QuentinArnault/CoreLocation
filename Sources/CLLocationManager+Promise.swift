@@ -65,7 +65,7 @@ extension CLLocationManager {
                                satisfying block: ((CLLocation) -> Bool)? = nil) -> Promise<[CLLocation]> {
         let manager = LocationManager(satisfying: block)
         manager.delegate = manager
-        if desiredAccuracy = desiredAccuracy {
+        if let desiredAccuracy = desiredAccuracy {
             manager.desiredAccuracy = desiredAccuracy
         }
         yield(manager)
